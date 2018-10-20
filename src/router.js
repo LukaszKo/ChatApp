@@ -1,6 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './views/Home.vue'
+import Login from '@/components/Login'
+import Registration from '@/components/Register'
+import MainView from '@/components/views/MainView'
+import Channel from '@/components/views/Channel'
+import AuthGuard from './utils/auth-guard'
+import AddGroupForm from '@/components/AddGroupForm'
 
 Vue.use(Router)
 
@@ -10,16 +15,31 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: Home
+      beforeEnter: AuthGuard,
+      name: 'main',
+      component: MainView,
+      children: [
+        {
+          path: '/home',
+          name: 'home',
+          component: Channel
+        },
+        {
+          path: 'create-group',
+          name: 'create-group',
+          component: AddGroupForm
+        }
+      ]
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+      path: '/signin',
+      name: 'signin',
+      component: Login
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: Registration
     }
   ]
 })

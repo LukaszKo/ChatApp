@@ -10,7 +10,7 @@
             v-alert.alert(:value="errMsg" outline color="error", icon="warning") {{errMsg}}
           v-card-text.pa-4
             v-text-field(v-model="name", label="Group name", :error-messages="errors.collect('name')", v-validate="'required'", data-vv-name="name", :disabled="isCreating")
-            v-text-field(v-model="admin.login", label="Admin", :error-messages="errors.collect('admin')", v-validate="'required'", data-vv-name="admin", disabled)
+            v-text-field(v-model="login", label="Admin", :error-messages="errors.collect('admin')", v-validate="'required'", data-vv-name="admin", disabled)
             .label.mb-1 Assign users
             multiselect(
               v-model="usersSelected",
@@ -43,7 +43,8 @@ export default {
       errMsg: null,
       usersSelected: [],
       submitClicked: false,
-      isCreating: false
+      isCreating: false,
+      login: ''
     }
   },
   computed: {
@@ -56,6 +57,7 @@ export default {
   },
   mounted () {
     this.admin = this.getUser
+    this.login = this.admin.login
   },
   methods: {
     ...mapActions('chat', [

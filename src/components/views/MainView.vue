@@ -198,7 +198,6 @@ export default {
     userStatus: function (val) {
       this.CHANGE_USER_OBJECT(val)
       this.$socket.emit('others-signin', Object.assign(this.getUser, { online: true }))
-
     },
     othersStatus: function (val) {
       !this.usersFetched && this.CHANGE_USER_OBJECT(val)

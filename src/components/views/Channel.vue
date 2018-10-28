@@ -120,6 +120,7 @@ export default {
     }
   },
   sockets: {
+    // getting msg from other client
     messageReceive: function (payload) {
       this.updateChatMsg(payload)
     }

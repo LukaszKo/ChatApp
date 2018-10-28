@@ -7,83 +7,93 @@ const User = require('../models/User')
 const Group = require('../models/Group')
 const authGuard = require('../utils/check-auth')
 
-router.post('/signup', (req, res, next) => {
+router.post('/signup', async (req, res, next) => {
   let newUser = new User({
     login: req.body.login,
-    password: req.body.password
+    password: req.body.password,
   })
 
-  User.getUserByLogin(req.body.login, (err, user) => {
-    if (err) throw err
+  try {
+    let user = await User.getUserByLogin(req.body.login)
     if (user) {
-      return res.status(409).json({success: false, msg: 'Login exists'})
+      return res.status(409).json({ success: false, msg: 'Login exists' })
     } else {
-      User.addUser(newUser, (err, user) => {
+      User.addUser(newUser, async (err, user) => {
         if (err) {
-          console.log(err)
-          res.json({success: false, msg: 'Failed to register user'})
+          return res.json({ success: false, msg: 'Failed to register user' })
         } else {
-          Group.getGroupByName("General", (err, group) => {
-            if (err) throw err
-            if (group) {
-              Group.updateGroup({name: group.name}, { $push: {users: user._id.toString()}}, (err, count, status) => {
+          let group = await Group.getGroupByName('General')
+          if (group) {
+            Group.updateGroup(
+              { name: group.name },
+              { $push: { users: user._id.toString() } },
+              (err, count, status) => {
                 if (err) throw err
-              })
-            }
-          })
-          res.json({success: true, msg: 'User registered'})
+              }
+            )
+          }
+          return res.json({ success: true, msg: 'User registered' })
         }
       })
     }
-  })
+  } catch (err) {
+    res.status(500).json({ error: err })
+  }
 })
 
 // Authenticate
-router.post('/signin', (req, res, next) => {
+router.post('/signin', async (req, res, next) => {
   const login = req.body.login
   const password = req.body.password
 
-  User.getUserByLogin(login, (err, user) => {
-    if (err) throw err
-    if (!user) {
-      return res.status(401).json({success: false, msg: 'User doesnt exists'})
+  try {
+    let user = await User.getUserByLogin(login)
+    if (user) {
+      User.comparePassword(password, user.password, (err, isMatch) => {
+        if (err) throw err
+        if (isMatch) {
+          const token = jwt.sign(user, config.dev.secret, {
+            expiresIn: 18000, // half hour
+          })
+
+          return res.json({
+            success: true,
+            token,
+            user: {
+              id: user._id,
+              login: user.login,
+            },
+          })
+        } else {
+          return res.json({ success: false, msg: 'Wrong password' })
+        }
+      })
+    } else {
+      return res
+        .status(401)
+        .json({ success: false, msg: 'User does not exists' })
     }
-
-    User.comparePassword(password, user.password, (err, isMatch) => {
-      if (err) throw err
-      if (isMatch) {
-        const token = jwt.sign(user, config.dev.secret, {
-          expiresIn: 18000 // half hour
-        })
-
-        res.json({
-          success: true,
-          token,
-          user: {
-            id: user._id,
-            login: user.login
-          }
-        })
-      } else {
-        return res.json({success: false, msg: 'Wrong password'})
-      }
-    })
-  })
+  } catch (err) {
+    return res.status(500).json({ error: err })
+  }
 })
 
 // Profile
-router.get('/', authGuard, (req, res, next) => {
-  User.getUsers((err, users) => {
+router.get('/', authGuard, async (req, res, next) => {
+  try {
+    let users = await User.getUsers()
     if (users) {
       let mappedUsers = users.map(user => {
-        let newUser = {id: user._id, login: user.login}
+        let newUser = { id: user._id, login: user.login }
         return newUser
       })
       return res.status(200).json(mappedUsers)
     } else {
-      return res.status(404).json({msg: 'Not found'})
+      return res.status(404).json({ msg: 'Not found' })
     }
-  })
+  } catch (err) {
+    res.status(500).json({ error: err })
+  }
 })
 
 module.exports = router

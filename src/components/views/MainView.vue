@@ -123,7 +123,8 @@ export default {
     ]),
     ...mapMutations('chat', [
       'CHANGE_USER_OBJECT',
-      'SET_ACTIVE_GROUP'
+      'SET_ACTIVE_GROUP',
+      'ADD_USER'
     ]),
     logoutUser () {
       this.$socket.emit('user-signout', Object.assign(this.getUser, { online: false }))

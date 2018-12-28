@@ -6,12 +6,13 @@
       v-card-text.pt-0.pb-1.pl-2.pr-0
         .text-container
           .text {{model.msg}}
-          .time {{model.time}}
+          .time {{getTime}}
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 import ResizeMixin from '../mixins/ResizeMixin'
+import dateHandler from '../services/dateHandler'
 
 export default {
   mixins: [ResizeMixin],
@@ -38,6 +39,9 @@ export default {
     },
     manageMsgWidth () {
       return this.isMediumScreen || this.isMobileScreen
+    },
+    getTime () {
+      return dateHandler.getDate(this.model.time, 'HH:mm')
     }
   },
   methods: {

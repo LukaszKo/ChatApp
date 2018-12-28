@@ -19,7 +19,6 @@
               label="login",
               track-by="login",
               :disabled="isCreating")
-            .red--text.mt-1(v-if="!usersSelected.length && submitClicked") The users field is requred
           v-card-actions.pa-4
             v-spacer
             v-btn(@click.native='back', :disabled="isCreating") Back
@@ -42,7 +41,6 @@ export default {
       admin: '',
       errMsg: null,
       usersSelected: [],
-      submitClicked: false,
       isCreating: false,
       login: ''
     }
@@ -72,10 +70,9 @@ export default {
     },
     async submitForm () {
       this.errMsg = null
-      this.submitClicked = true
       try {
         const validate = await this.$validator.validateAll()
-        if (validate && this.usersSelected.length) {
+        if (validate) {
           this.isCreating = true
           let usersGroup = this.mapSelectedUsers()
           let newGroup = { name: this.name, users: usersGroup, admin: this.admin.id, history: [] }

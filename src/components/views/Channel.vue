@@ -16,30 +16,28 @@ import { EventBus } from '../../utils/event-bus'
 
 export default {
   components: { MessageContainer },
-  data () {
+  data() {
     return {
       inputMsg: '',
       conversationLimit: 5,
-      isReady: false
+      isReady: false,
     }
   },
   computed: {
-    ...mapGetters('core', [
-      'getUser'
-    ]),
+    ...mapGetters('core', ['getUser']),
     ...mapGetters('chat', [
       'getActiveGroup',
       'checkGroup',
-      'getConversationMap'
+      'getConversationMap',
     ]),
-    sendIcon () {
+    sendIcon() {
       return faArrowAltCircleRight
     },
-    msgHistory () {
+    msgHistory() {
       return [...this.getActiveGroup.history]
-    }
+    },
   },
-  mounted () {
+  mounted() {
     EventBus.$on('on-channel-changed', () => {
       this.scrollToBottom(0)
     })
@@ -52,59 +50,59 @@ export default {
       'ADD_HISTORY_TO_GROUP',
       'ADD_TO_CONVERSATION_MAP',
       'CLEAR_FROM_CONVERSATION_MAP',
-      'ADD_TO_CURRENT_CONVERSATION'
+      'ADD_TO_CURRENT_CONVERSATION',
     ]),
-    ...mapActions('chat', [
-      'updateGroupHistory'
-    ]),
-    onInputChange (val) {
+    ...mapActions('chat', ['updateGroupHistory']),
+    onInputChange(val) {
       this.inputMsg = val
     },
-    scrollToBottom (delay) {
+    scrollToBottom(delay) {
       setTimeout(() => {
         let box = document.getElementById('message-box')
         if (box) {
-          let shouldScroll = box.scrollTop + box.clientHeight === box.scrollHeight
+          let shouldScroll =
+            box.scrollTop + box.clientHeight === box.scrollHeight
           if (!shouldScroll) {
             box.scrollTop = box.scrollHeight
           }
         }
       }, delay)
     },
-    send () {
+    send() {
       if (this.inputMsg) {
-        let payload = { group: this.getActiveGroup, user: this.getUser, msg: this.inputMsg }
+        let payload = {
+          group: this.getActiveGroup,
+          user: this.getUser,
+          msg: this.inputMsg,
+        }
         this.updateChatMsg(payload)
         this.$socket.emit('message-send', payload)
+
         this.manageCurrentConversation()
       }
       this.inputMsg = ''
     },
-    getTime () {
-      let timestamp = new Date()
-      let time = ''
-      if (timestamp.getMinutes().toString().length === 1) {
-        time = `${timestamp.getHours()}:0${timestamp.getMinutes()}`
-      } else {
-        time = `${timestamp.getHours()}:${timestamp.getMinutes()}`
-      }
-      return time
-    },
-    updateChatMsg (payload) {
+    updateChatMsg(payload) {
       let isGroup = this.checkGroup(payload.group.name)
       let isPrivateChat = this.getUser.login === payload.group.name
       if (isGroup || isPrivateChat) {
-        let time = this.getTime()
-        let userMsg = { login: payload.user.login, msg: payload.msg, time }
-        this.ADD_TO_CONVERSATION_MAP({ groupId: payload.group.id, msg: userMsg })
+        let userMsg = {
+          login: payload.user.login,
+          msg: payload.msg,
+          time: Date.now(),
+        }
+        this.ADD_TO_CONVERSATION_MAP({
+          groupId: payload.group.id,
+          msg: userMsg,
+        })
         this.ADD_HISTORY_TO_GROUP({
           group: payload.group,
-          msg: userMsg
+          msg: userMsg,
         })
       }
       this.scrollToBottom(0)
     },
-    async updateDatabase (list) {
+    async updateDatabase(list) {
       try {
         await this.updateGroupHistory(list)
       } catch (err) {
@@ -113,18 +111,21 @@ export default {
         this.CLEAR_FROM_CONVERSATION_MAP(this.getActiveGroup.id)
       }
     },
-    manageCurrentConversation () {
-      if (this.getConversationMap[this.getActiveGroup.id].length === this.conversationLimit) {
+    manageCurrentConversation() {
+      if (
+        this.getConversationMap[this.getActiveGroup.id].length ===
+        this.conversationLimit
+      ) {
         this.updateDatabase(this.getConversationMap[this.getActiveGroup.id])
       }
-    }
+    },
   },
   sockets: {
     // getting msg from other client
-    messageReceive: function (payload) {
+    messageReceive: function(payload) {
       this.updateChatMsg(payload)
-    }
-  }
+    },
+  },
 }
 </script>
 

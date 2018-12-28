@@ -3,6 +3,7 @@ const router = express.Router()
 const passport = require('passport')
 const jwt = require('jsonwebtoken')
 const config = require('../config/db')
+const UserController = require('../controllers/user')
 const User = require('../models/User')
 const Group = require('../models/Group')
 const authGuard = require('../utils/check-auth')
@@ -14,11 +15,11 @@ router.post('/signup', async (req, res, next) => {
   })
 
   try {
-    let user = await User.getUserByLogin(req.body.login)
+    let user = await UserController.getUserByLogin(req.body.login)
     if (user) {
       return res.status(409).json({ success: false, msg: 'Login exists' })
     } else {
-      User.addUser(newUser, async (err, user) => {
+      UserController.addUser(newUser, async (err, user) => {
         if (err) {
           return res.json({ success: false, msg: 'Failed to register user' })
         } else {
@@ -32,7 +33,7 @@ router.post('/signup', async (req, res, next) => {
               }
             )
           }
-          return res.json({ success: true, msg: 'User registered' })
+          return res.json({ success: true, msg: 'UserController registered' })
         }
       })
     }
@@ -47,9 +48,9 @@ router.post('/signin', async (req, res, next) => {
   const password = req.body.password
 
   try {
-    let user = await User.getUserByLogin(login)
+    let user = await UserController.getUserByLogin(login)
     if (user) {
-      User.comparePassword(password, user.password, (err, isMatch) => {
+      UserController.comparePassword(password, user.password, (err, isMatch) => {
         if (err) throw err
         if (isMatch) {
           const token = jwt.sign(user, config.dev.secret, {
@@ -71,7 +72,7 @@ router.post('/signin', async (req, res, next) => {
     } else {
       return res
         .status(401)
-        .json({ success: false, msg: 'User does not exists' })
+        .json({ success: false, msg: 'UserController does not exists' })
     }
   } catch (err) {
     return res.status(500).json({ error: err })
@@ -81,7 +82,7 @@ router.post('/signin', async (req, res, next) => {
 // Profile
 router.get('/', authGuard, async (req, res, next) => {
   try {
-    let users = await User.getUsers()
+    let users = await UserController.getUsers()
     if (users) {
       let mappedUsers = users.map(user => {
         let newUser = { id: user._id, login: user.login }

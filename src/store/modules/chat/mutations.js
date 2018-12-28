@@ -7,6 +7,10 @@ export default {
   },
   [constants.CHANGE_USER_OBJECT] (state, payload) {
     let user = state.users.find(user => user.id === payload.id)
+    if (!user) {
+      user = payload
+      state.users.push(user)
+    }
     if (user) Vue.set(user, 'online', payload.online)
   },
   [constants.SET_USER_GROUPS] (state, payload) {
@@ -32,5 +36,8 @@ export default {
   },
   [constants.CLEAR_FROM_CONVERSATION_MAP] (state, payload) {
     state.conversationMap[payload] = []
+  },
+  [constants.ADD_USER] (state, payload) {
+    state.users.push(payload)
   }
 }

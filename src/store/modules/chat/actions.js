@@ -19,10 +19,8 @@ export default {
       let response = await ServiceFactory.ProccessGetRequest(
         `groups?userId=${user.id}`
       )
-      let generalGroup = response.data.find(group => group.name === 'General')
-      generalGroup
-        ? commit(constants.SET_ACTIVE_GROUP, generalGroup)
-        : commit(constants.SET_ACTIVE_GROUP, response.data[0])
+      let generalGroup = response.data.find(group => group.name.toLowerCase() === 'general')
+      if (generalGroup) commit(constants.SET_ACTIVE_GROUP, generalGroup)
       commit(constants.SET_USER_GROUPS, response.data)
     } catch (err) {
       throw err

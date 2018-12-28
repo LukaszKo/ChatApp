@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Group = require('../models/Group')
+const GroupController = require('../controllers/group')
 const authGuard = require('../utils/check-auth')
 
 router.post('/add', authGuard, async (req, res, next) => {
@@ -13,13 +14,13 @@ router.post('/add', authGuard, async (req, res, next) => {
   })
 
   try {
-    let group = await Group.getGroupByName(req.body.name)
+    let group = await GroupController.getGroupByName(req.body.name)
     if (group) {
       res
         .status(409)
         .json({ success: false, msg: 'Group with this name already exists' })
     } else {
-      let response = await Group.createGroup(newGroup)
+      let response = await GroupController.createGroup(newGroup)
       let mappedGroup = {
         id: newGroup._id,
         history: newGroup.history,
@@ -42,7 +43,7 @@ router.post('/add', authGuard, async (req, res, next) => {
 
 router.get('/', authGuard, async (req, res, next) => {
   try {
-    const groups = await Group.getGroups(req.query.userId)
+    const groups = await GroupController.getGroups(req.query.userId)
     let newGroups = groups.map(group => {
       let newGroup = {
         id: group._id,
@@ -66,7 +67,7 @@ router.post('/update/history', authGuard, (req, res, next) => {
   let update = { $push: { history: { $each: history } } }
   let options = {}
 
-  Group.updateGroup(query, update, options, (err, data) => {
+  GroupController.updateGroup(query, update, options, (err, data) => {
     if (err) {
       res
         .status(500)

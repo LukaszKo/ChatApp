@@ -2,7 +2,7 @@ import ServiceFactory from '../../../services/ServiceFactory'
 import constants from './constants'
 
 export default {
-  async fetchUsers ({commit, rootState}) {
+  async fetchUsers ({ commit, rootState }) {
     try {
       let response = await ServiceFactory.ProccessGetRequest('users')
       let users = response.data.filter(user => user.login && user.id !== rootState.core.user.id)
@@ -11,7 +11,7 @@ export default {
       throw err
     }
   },
-  async fetchGroups ({commit, state, getters, rootGetters, dispatch}) {
+  async fetchGroups ({ commit, state, getters, rootGetters, dispatch }) {
     const user = rootGetters['core/getUser']
     try {
       let response = await ServiceFactory.ProccessGetRequest(`groups?userId=${user.id}`)
@@ -22,16 +22,16 @@ export default {
       throw err
     }
   },
-  async updateGroupHistory ({commit, getters}, payload) {
+  async updateGroupHistory ({ commit, getters }, payload) {
     let groupId = getters.getActiveGroup.id
     let history = payload
     try {
-      await ServiceFactory.ProccessPostRequest('groups/update/history', {groupId, history})
+      await ServiceFactory.ProccessPostRequest('groups/update/history', { groupId, history })
     } catch (err) {
       throw err
     }
   },
-  async addNewGroup ({commit, getters}, payload) {
+  async addNewGroup ({ commit, getters }, payload) {
     try {
       payload.private = false
       let response = await ServiceFactory.ProccessPostRequest('groups/add', payload)
@@ -43,11 +43,11 @@ export default {
       throw err
     }
   },
-  async createChat ({commit, getters, rootGetters}, payload) {
+  async createChat ({ commit, getters, rootGetters }, payload) {
     const user = rootGetters['core/getUser']
     try {
       let name = `${user.login}-${payload.login}`
-      let newChat = {history: [], name, admin: user.id, private: true, users: [user.id, payload.id]}
+      let newChat = { history: [], name, admin: user.id, private: true, users: [user.id, payload.id] }
       let response = await ServiceFactory.ProccessPostRequest('groups/add', newChat)
       let group = response.data.group
       commit(constants.ADD_GROUP, group)

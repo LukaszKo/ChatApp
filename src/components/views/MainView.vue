@@ -56,7 +56,14 @@
 </template>
 
 <script>
-import { faSignOutAlt, faUserCircle, faCircle, faPlusCircle, faCog, faComments } from '@fortawesome/free-solid-svg-icons'
+import {
+  faSignOutAlt,
+  faUserCircle,
+  faCircle,
+  faPlusCircle,
+  faCog,
+  faComments
+} from '@fortawesome/free-solid-svg-icons'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { EventBus } from '../../utils/event-bus'
 
@@ -67,15 +74,11 @@ export default {
       drawerLeft: null,
       usersFetched: false,
       groupsFetched: false,
-      items: [
-        { label: 'Logut', icon: 'signoutIcon', action: 'logout' }
-      ]
+      items: [{ label: 'Logut', icon: 'signoutIcon', action: 'logout' }]
     }
   },
   computed: {
-    ...mapGetters('core', [
-      'getUser'
-    ]),
+    ...mapGetters('core', ['getUser']),
     ...mapGetters('chat', [
       'getAllUsers',
       'getGroups',
@@ -112,21 +115,14 @@ export default {
     }
   },
   methods: {
-    ...mapActions('core', [
-      'logout',
-      'checkValidToken'
-    ]),
-    ...mapActions('chat', [
-      'fetchUsers',
-      'fetchGroups',
-      'createChat'
-    ]),
-    ...mapMutations('chat', [
-      'CHANGE_USER_OBJECT',
-      'SET_ACTIVE_GROUP'
-    ]),
+    ...mapActions('core', ['logout', 'checkValidToken']),
+    ...mapActions('chat', ['fetchUsers', 'fetchGroups', 'createChat']),
+    ...mapMutations('chat', ['CHANGE_USER_OBJECT', 'SET_ACTIVE_GROUP']),
     logoutUser () {
-      this.$socket.emit('user-signout', Object.assign(this.getUser, { online: false }))
+      this.$socket.emit(
+        'user-signout',
+        Object.assign(this.getUser, { online: false })
+      )
       this.logout()
       this.$router.push('/signin')
     },
@@ -158,7 +154,11 @@ export default {
       return isOnline ? 'white' : 'grey'
     },
     checkActive (groupName) {
-      return this.getActiveGroup && (this.getActiveGroup.name === groupName || this.getActiveGroup.name.includes(groupName))
+      return (
+        this.getActiveGroup &&
+        (this.getActiveGroup.name === groupName ||
+          this.getActiveGroup.name.includes(groupName))
+      )
     },
     addGroup () {
       this.$router.push({ name: 'create-group' })
@@ -183,22 +183,25 @@ export default {
       try {
         await this.createChat(user)
       } catch (err) {
-
       } finally {
-
       }
     }
   },
   async created () {
     await this.getUsers()
     await this.getUserGroups()
-    this.$socket.emit('user-signin', Object.assign(this.getUser, { online: true }))
+    this.$socket.emit(
+      'user-signin',
+      Object.assign(this.getUser, { online: true })
+    )
   },
   sockets: {
     userStatus: function (val) {
       this.CHANGE_USER_OBJECT(val)
-      this.$socket.emit('others-signin', Object.assign(this.getUser, { online: true }))
-
+      this.$socket.emit(
+        'others-signin',
+        Object.assign(this.getUser, { online: true })
+      )
     },
     othersStatus: function (val) {
       !this.usersFetched && this.CHANGE_USER_OBJECT(val)

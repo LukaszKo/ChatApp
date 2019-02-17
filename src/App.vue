@@ -6,14 +6,14 @@
 </template>
 
 <script>
-  export default {
-    name: 'app',
-    sockets: {
-      connect () {
-        console.log('is cconnected from app')
-      }
+export default {
+  name: 'app',
+  sockets: {
+    connect () {
+      console.log('is cconnected from app')
     }
   }
+}
 </script>
 
 <style lang="sass" scoped>
